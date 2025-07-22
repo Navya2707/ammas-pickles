@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Amma's Pickles</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Amma's Pickles</h1>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#products">Products</a>
+      <a href="#contact">Contact</a>
+      <a href="#" onclick="showProfile()">Profile</a>
+    </nav>
+  </header>
+
+  <section id="home">
+    
+    <h1 style="text-align: center;">Taste the Tradition</h1>
+    <p style="text-align: center;">Delicious homemade pickles, made with love and tradition.</p>
+
+  </section>
+  <section id="products">
+  <h2 style="text-align:center;">Our Pickles</h2>
+  <h3>Veg Pickles</h3>
+  <div class="product-container" id="veg-products">
+    <!-- Veg Pickles will appear here -->
+  </div>
+
+  <h3>Non-Veg Pickles</h3>
+  <div class="product-container" id="nonveg-products">
+    <!-- Non-Veg Pickles will appear here -->
+  </div>
+</section>
+
+
+  <section id="contact" style="text-align: center; padding: 30px;">
+    <h2>Contact Us</h2>
+    <p>📍 Near Ramalayam Temple, Vetapalem, Bapatla, Andhra Pradesh</p>
+    <p>📞 9110755382</p>
+    <p>📧 navyareddynaidu@gmail.com</p>
+
+    <form action="https://formsubmit.co/navyareddynaidu@gmail.com" method="POST" class="contact-form">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="text" name="name" placeholder="Your Name" required />
+      <input type="email" name="email" placeholder="Your Email" required />
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Amma's Pickles. All rights reserved.</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCEVy7DhLG8oTAYc49kmnRaHOdf6RoD_DQ",
+      authDomain: "navya-32cae.firebaseapp.com",
+      projectId: "navya-32cae",
+      storageBucket: "navya-32cae.appspot.com",
+      messagingSenderId: "815209137740",
+      appId: "1:815209137740:web:cd6a6f998e34b3e19656e9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Profile click handler
+    window.showProfile = () => {
+      const user = auth.currentUser;
+      if (user) {
+        const name = user.displayName || user.email;
+        alert("Logged in as: " + name);
+      } else {
+        alert("No user is currently logged in.");
+      }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        alert("Please login first.");
+        window.location.href = "login.html";
+      }
+    });
+
+    async function loadDynamicProducts() {
+      const productsCol = collection(db, "products");
+      const snapshot = await getDocs(productsCol);
+      snapshot.forEach((doc) => {
+        const product = doc.data();
+        const container = document.getElementById(product.category === 'nonveg' ? 'nonveg-products' : 'veg-products');
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = `
+          <img src="${product.image}" alt="${product.name}">
+          <h4>${product.name}</h4>
+          <p>₹${product.price} per 500g</p>
+          <a href="https://wa.me/919110755382?text=I want to order ${product.name}" target="_blank">Order Now</a>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    loadDynamicProducts();
+  </script>
+</body>
+</html>
